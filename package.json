@@ -1,0 +1,28 @@
+{
+  "name": "furry-potato",
+  "version": "1.0.0",
+  "description": "minecraft lobby server thing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kingdom-of-Moon/furry-potato.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kingdom-of-Moon/furry-potato/issues"
+  },
+  "homepage": "https://github.com/Kingdom-of-Moon/furry-potato#readme",
+  "dependencies": {
+    "minecraft-data": "^2.93.0",
+    "minecraft-protocol": "^1.26.5",
+    "prismarine-chunk": "^1.26.0",
+    "prismarine-schematic": "^1.2.1",
+    "prismarine-world": "^3.6.0",
+    "save": "^2.4.0"
+  }
+}
