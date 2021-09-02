@@ -21,7 +21,6 @@
     "minecraft-data": "^2.93.0",
     "minecraft-protocol": "^1.26.5",
     "prismarine-chunk": "^1.26.0",
-    "prismarine-schematic": "^1.2.1",
     "prismarine-world": "^3.6.0",
     "save": "^2.4.0"
   }
