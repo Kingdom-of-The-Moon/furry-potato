@@ -8,10 +8,12 @@ const Vec3 = require('vec3');
 function chunkGen(chunkX, chunkY) {
 	const chunk = new Chunk();
 
+	if (chunkX == 0 && chunkY == 0) {
+		chunk.setBlockType(new Vec3(0, 99, 0), 1);
+	}
+
 	for (let x = 0; x < 16; x++) {
 		for (let z = 0; z < 16; z++) {
-			chunk.setBlockType(new Vec3(x, 99, z), mcData.blocksByName.grass_block.id);
-			chunk.setBlockData(new Vec3(x, 99, z), 1);
 			for (let y = 0; y < 256; y++) {
 				chunk.setSkyLight(new Vec3(x, y, z), 15);
 			}
@@ -31,14 +33,23 @@ var server = mc.createServer({
 	version: '1.17.1'
 });
 
-let chunks = 2;
+let chunks = 8;
+
+let Chunks = [];
+for (let x = -chunks; x <= chunks; x++) {
+	for (let z = -chunks; z <= chunks; z++) {
+		Chunks.push([x, z]);
+	}
+}
 
 server.on('login', client => {
+	let count = 0;
 	let loginPacket = mcData.loginPacket;
 	loginPacket.dimension.value.effects.value = "minecraft:the_end";
 
 	client.on("packet", (data, meta) => {
-		//console.log(meta.name, data);
+		if (meta.name == "position_look" | meta.name == "position" | meta.name == "look" | meta.name == "keep_alive") return;
+		console.log(meta.name, data);
 	});
 
 	client.write('login', {
@@ -59,35 +70,41 @@ server.on('login', client => {
 		isFlat: false
 	});
 
-	for (let x = -chunks; x <= chunks - 1; x++) {
-		for (let z = -chunks; z <= chunks - 1; z++) {
-			world.getColumn(x, z).then((chunk) => {
-				console.log(`Chunk ${x} ${z}`);
-				client.write('map_chunk', {
-					x: x,
-					z: z,
-					groundUp: true,
-					biomes: chunk.dumpBiomes !== undefined ? chunk.dumpBiomes() : undefined,
-					heightmaps: { type: 'compound', name: '', value: {} },
-					bitMap: chunk.getMask(),
-					chunkData: chunk.dump(),
-					blockEntities: []
-				});
-				client.write('position', {
-					x: 0,
-					y: 100,
-					z: 0,
-					yaw: 0,
-					pitch: 0,
-					flags: 0x00
-				});
+	Chunks.forEach(coords => {
+		world.getColumn(coords[0], coords[1]).then((chunk) => {
+			client.write('map_chunk', {
+				x: coords[0],
+				z: coords[1],
+				groundUp: true,
+				biomes: chunk.dumpBiomes !== undefined ? chunk.dumpBiomes() : undefined,
+				heightmaps: { type: 'compound', name: '', value: {} },
+				bitMap: chunk.getMask(),
+				chunkData: chunk.dump(),
+				blockEntities: []
 			});
-		}
-	}
+			if (count++ == coords.length) {
+				setTimeout(() => {
+					client.write('position', {
+						x: 0,
+						y: 100,
+						z: 0,
+						yaw: 0,
+						pitch: 0,
+						flags: 0x00
+					});
+				}, 100);
+			}
+		});
+	});
 
 	client.on('chat', data => {
-		console.log(client.uuid)
-		for (const [key, value] of Object.entries(server.clients)) {
+		if (data.message == "/edit") {
+			client.write("game_state_change", {
+				reason: 3,
+				gameMode: 1
+			});
+		}
+		else for (const [key, value] of Object.entries(server.clients)) {
 			value.write('chat', {
 				message: JSON.stringify([
 					{ text: client.username, color: "#99bbee" },
