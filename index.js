@@ -39,7 +39,7 @@ server.on('login', client => {
 	client.write('login', {
 		entityId: client.id,
 		isHardcore: false,
-		gameMode: 0,
+		gameMode: 2,
 		previousGameMode: 0,
 		worldNames: loginPacket.worldNames,
 		dimensionCodec: loginPacket.dimensionCodec,
@@ -62,10 +62,10 @@ server.on('login', client => {
 		pitch: 0,
 		flags: 0x00
 	});
-	
+
 	// temp
-	for (let x = -chunks; x <= chunks-1; x++) {
-		for (let z = -chunks; z <= chunks-1; z++) {
+	for (let x = -chunks; x <= chunks - 1; x++) {
+		for (let z = -chunks; z <= chunks - 1; z++) {
 			client.write('map_chunk', {
 				x: x,
 				z: z,
@@ -78,4 +78,13 @@ server.on('login', client => {
 			});
 		}
 	}
+	client.on('chat', data => {
+		for (const [key, value] of Object.entries(server.clients)) {
+			value.write('chat', { message: JSON.stringify([
+				{ text: client.username, color: "#99bbee" },
+				{ text: ": ", color: "#6688aa" },
+				{ text: data.message, color: "#ffffff" }
+			]), position: 0, sender: '0' });
+		}
+	});
 });
