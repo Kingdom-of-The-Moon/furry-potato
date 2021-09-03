@@ -25,8 +25,6 @@ function emptyChunkGen(chunkX, chunkY) {
 	return chunk;
 }
 
-//let world = new World('world.litematic', { x: -2, y: -2, z: -2 });
-
 var server = mc.createServer({
 	'online-mode': true,
 	encryption: false,
