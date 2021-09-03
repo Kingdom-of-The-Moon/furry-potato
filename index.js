@@ -97,12 +97,17 @@ server.on('login', client => {
 		});
 	});
 
+	client.on('position', data => {
+		if (data.y < 0) client.write('position', { x: 0, y: 100, z: 0, yaw: 0, pitch: 0, flags: 0x00 });
+	});
+
 	client.on('chat', data => {
 		if (data.message == "/edit") {
 			client.write("game_state_change", {
 				reason: 3,
 				gameMode: 1
 			});
+			client.editing = true;
 		}
 		else for (const [key, value] of Object.entries(server.clients)) {
 			value.write('chat', {
