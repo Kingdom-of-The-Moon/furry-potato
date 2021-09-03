@@ -1,13 +1,13 @@
+const fs = require('fs');
 const mc = require('minecraft-protocol');
 const mcData = require('minecraft-data')('1.17.1');
 const Chunk = require('prismarine-chunk')('1.17.1');
-const World = require('prismarine-world')('1.17.1');
-const Anvil = require('./prismarine-provider-anvil/index.js').Anvil('1.17.1');
-const Inventory = require("./lib/inventory.js");
 const Vec3 = require('vec3');
-const WorldManager = require('./lib/world.js');
+const World = require('./lib/world.js');
 
-function chunkGen(chunkX, chunkY) {
+const world = World.createWorld(8); // world size in chunks in each direction from 0 0
+
+function emptyChunkGen(chunkX, chunkY) {
 	const chunk = new Chunk();
 
 	if (chunkX == 0 && chunkY == 0) {
@@ -25,7 +25,7 @@ function chunkGen(chunkX, chunkY) {
 	return chunk;
 }
 
-let world = new World(chunkGen, new Anvil("./chunks/"), 10000);
+//let world = new World('world.litematic', { x: -2, y: -2, z: -2 });
 
 var server = mc.createServer({
 	'online-mode': true,
@@ -36,18 +36,16 @@ var server = mc.createServer({
 	motd: "A JavaScript"
 });
 
-let chunks = 8;
+let size = 8;
+let list = [];
 
-let Chunks = [];
-for (let x = -chunks; x <= chunks; x++) {
-	for (let z = -chunks; z <= chunks; z++) {
-		Chunks.push([x, z]);
+for (let x = -size; x <= size; x++) {
+	for (let z = -size; z <= size; z++) {
+		list.push([x, z]);
 	}
 }
 
 server.on('login', client => {
-	let inventory = new Inventory(client);
-	let worldManager = new WorldManager(client, world, inventory);
 	world.on('blockUpdate', console.log);
 	let count = 0;
 	let loginPacket = mcData.loginPacket;
