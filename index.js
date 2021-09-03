@@ -25,7 +25,7 @@ function chunkGen(chunkX, chunkY) {
 	return chunk;
 }
 
-let world = new World(chunkGen, new Anvil(chunkGen, "./chunks/", 10000));
+let world = new World(chunkGen, new Anvil("./chunks/"), 10000);
 
 var server = mc.createServer({
 	'online-mode': true,
