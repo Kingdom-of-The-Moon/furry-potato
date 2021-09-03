@@ -23,10 +23,7 @@ function chunkGen(chunkX, chunkY) {
 	return chunk;
 }
 
-let world = new World.World(chunkGen, 8);
-
-world.on("loadedChunk", data => console.log(data));
-world.on("loadedChunks", console.log);
+let world = new World.World("./chunks/", 8);
 
 var server = mc.createServer({
 	'online-mode': true,
@@ -37,10 +34,19 @@ var server = mc.createServer({
 	motd: "A JavaScript"
 });
 
+let chunks = 8;
+
+let Chunks = [];
+for (let x = -chunks; x <= chunks; x++) {
+	for (let z = -chunks; z <= chunks; z++) {
+		Chunks.push([x, z]);
+	}
+}
+
 server.on('login', client => {
 	let inventory = new Inventory(client);
 	let worldManager = new World.Manager(client, world, inventory);
-	//world.on('blockUpdate', console.log);
+	world.on('blockUpdate', console.log);
 	let count = 0;
 	let loginPacket = mcData.loginPacket;
 	loginPacket.dimension.value.effects.value = "minecraft:the_end";
@@ -68,29 +74,31 @@ server.on('login', client => {
 		isFlat: false
 	});
 
-	world.chunks.forEach(chunk => {
-		client.write('map_chunk', {
-			x: chunk.x,
-			z: chunk.z,
-			groundUp: true,
-			biomes: chunk.dumpBiomes !== undefined ? chunk.dumpBiomes() : undefined,
-			heightmaps: { type: 'compound', name: '', value: {} },
-			bitMap: chunk.getMask(),
-			chunkData: chunk.dump(),
-			blockEntities: []
+	Chunks.forEach(coords => {
+		world.getColumn(coords[0], coords[1]).then((chunk) => {
+			client.write('map_chunk', {
+				x: coords[0],
+				z: coords[1],
+				groundUp: true,
+				biomes: chunk.dumpBiomes !== undefined ? chunk.dumpBiomes() : undefined,
+				heightmaps: { type: 'compound', name: '', value: {} },
+				bitMap: chunk.getMask(),
+				chunkData: chunk.dump(),
+				blockEntities: []
+			});
+			if (count++ == coords.length) {
+				setTimeout(() => {
+					client.write('position', {
+						x: 0,
+						y: 100,
+						z: 0,
+						yaw: 0,
+						pitch: 0,
+						flags: 0x00
+					});
+				}, 100);
+			}
 		});
-		if (count++ == world.chunks.length) {
-			setTimeout(() => {
-				client.write('position', {
-					x: 0,
-					y: 100,
-					z: 0,
-					yaw: 0,
-					pitch: 0,
-					flags: 0x00
-				});
-			}, 100);
-		}
 	});
 
 	client.on('position', data => {
