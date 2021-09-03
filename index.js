@@ -1,11 +1,9 @@
 const mc = require('minecraft-protocol');
 const mcData = require('minecraft-data')('1.17.1');
 const Chunk = require('prismarine-chunk')('1.17.1');
-const World = require('prismarine-world')('1.17.1');
-const Anvil = require('./prismarine-provider-anvil/index.js').Anvil('1.17.1');
 const Inventory = require("./lib/inventory.js");
+const World = require('./lib/world.js');
 const Vec3 = require('vec3');
-const WorldManager = require('./lib/world.js');
 
 function chunkGen(chunkX, chunkY) {
 	const chunk = new Chunk();
@@ -25,7 +23,7 @@ function chunkGen(chunkX, chunkY) {
 	return chunk;
 }
 
-let world = new World(chunkGen, new Anvil("./chunks/"));
+let world = new World.World("./chunks/", 8);
 
 var server = mc.createServer({
 	'online-mode': true,
@@ -47,7 +45,7 @@ for (let x = -chunks; x <= chunks; x++) {
 
 server.on('login', client => {
 	let inventory = new Inventory(client);
-	let worldManager = new WorldManager(client, world, inventory);
+	let worldManager = new World.Manager(client, world, inventory);
 	world.on('blockUpdate', console.log);
 	let count = 0;
 	let loginPacket = mcData.loginPacket;
