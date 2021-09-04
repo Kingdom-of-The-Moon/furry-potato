@@ -5,7 +5,7 @@ const Chunk = require('prismarine-chunk')('1.17.1');
 const Vec3 = require('vec3');
 const World = require('./lib/world.js');
 
-const world = World.createWorld(8); // world size in chunks in each direction from 0 0
+const world = new World("./world.litematic");
 
 function emptyChunkGen(chunkX, chunkY) {
 	const chunk = new Chunk();
